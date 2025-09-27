@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI美容診断</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(212, 175, 55, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            font-size: 0.95rem;
+            color: #868e96;
+            padding: 0 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-counter {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #d4af37;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #343a40;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 400;
+            color: #495057;
+        }
+
+        .option:hover {
+            border-color: #d4af37;
+            background: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.15);
+        }
+
+        .option.selected {
+            border-color: #d4af37;
+            background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 30px auto 0;
+            display: block;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .next-btn.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+
+        .result-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            text-align: center;
+            display: none;
+            animation: fadeInScale 0.8s ease;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-type {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 15px;
+        }
+
+        .result-subtitle {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+
+        .result-image {
+            width: 120px;
+            height: 120px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #d4af37;
+            overflow: hidden;
+        }
+
+        .result-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recommendation-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .recommendation-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation-content {
+            font-size: 0.95rem;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .restart-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+
+        .restart-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .quiz-container, .result-container {
+                padding: 30px 20px;
+            }
+
+            .question {
+                font-size: 1.1rem;
+            }
+
+            .option {
+                padding: 15px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">美容診断</div>
+            <div class="subtitle">あなたの美しさを引き出すパーソナライズ診断</div>
+            <div class="description">
+                4つの簡単な質問で、あなたの性格に合った<br>
+                眉アートと美容点滴をご提案いたします
+            </div>
+        </div>
+
+        <div class="quiz-container" id="quizContainer">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="question-counter" id="questionCounter">質問 1 / 4</div>
+            <div class="question" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">次へ進む</button>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-image" id="resultImage">
+                <img src="" alt="" id="resultAvatar">
+            </div>
+            <div class="result-type" id="resultType"></div>
+            <div class="result-subtitle" id="resultSubtitle"></div>
+
+            <div class="recommendation-section">
+                <div class="recommendation-title">
+                    👁️ おすすめ眉アート
+                </div>
+                <div class="recommendation-content" id="eyebrowRecommendation"></div>
+            </div>
+
+            <div class="recommendation-section">
+                <div class="recommendation-title">
+                    💉 おすすめ美容点滴
+                </div>
+                <div class="recommendation-content" id="ivRecommendation"></div>
+            </div>
+
+            <button class="restart-btn" onclick="restartQuiz()">もう一度診断する</button>
+        </div>
+    </div>
+
+    <script>
+        // MBTI質問データ
+        const questions = [
+            {
+                text: "友人との時間を過ごすとき、あなたはどちらの状況を好みますか？",
+                options: [
+                    { text: "大勢の人と一緒にワイワイと楽しむ", value: "E" },
+                    { text: "少人数で深い話をじっくりと楽しむ", value: "I" }
+                ]
+            },
+            {
+                text: "新しい美容法を試すとき、あなたはどちらを重視しますか？",
+                options: [
+                    { text: "実際の効果や口コミなど具体的な情報", value: "S" },
+                    { text: "理論やコンセプトなど背景にある考え方", value: "N" }
+                ]
+            },
+            {
+                text: "エステサロンを選ぶとき、重要視するポイントは？",
+                options: [
+                    { text: "技術力の高さや施術の効果", value: "T" },
+                    { text: "スタッフの人柄や雰囲気の良さ", value: "F" }
+                ]
+            },
+            {
+                text: "美容ケアのスケジュールについて、あなたのスタイルは？",
+                options: [
+                    { text: "決まった時間に定期的にケアを行う", value: "J" },
+                    { text: "気分や状況に合わせて柔軟にケアする", value: "P" }
+                ]
+            }
+        ];
+
+        // MBTI結果データ（新しいタイプ名・説明、16personalities.comのアバター画像URL）
+        const mbtiResults = {
+            "ENFJ": {
+                type: "主人公タイプ",
+                subtitle: "人を惹きつけるリーダー気質",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/enfj-protagonist.png",
+                eyebrow: "ナチュラル・アーチ眉：自然で上品なカーブが、あなたの親しみやすさと品格を同時に表現。人を惹きつける魅力的な印象を演出します。",
+                iv: "ビタミンC高濃度点滴：内側から輝く透明感で、人を引き付ける自然な美しさをサポート。抗酸化作用で疲れ知らずの輝きを。"
+            },
+            "ENFP": {
+                type: "運動家タイプ",
+                subtitle: "明るく社交的、第一印象重視",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/enfp-campaigner.png",
+                eyebrow: "フレッシュ・ストレート眉：若々しく親しみやすい印象で、あなたの明るい性格を表現。どんな表情にも似合う万能眉。",
+                iv: "美肌点滴：内側からの輝きで自然な美しさを引き出し、あなたの魅力的な笑顔をより一層輝かせます。"
+            },
+            "ENTJ": {
+                type: "指揮官タイプ",
+                subtitle: "決断力・リーダーシップ",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/entj-commander.png",
+                eyebrow: "シャープ・アングル眉：意志の強さと決断力を表現する凛とした眉。ビジネスシーンでも存在感を放つ洗練されたスタイル。",
+                iv: "プラセンタ点滴：疲労回復と美肌効果で、忙しいあなたをトータルサポート。内側からエネルギッシュな美しさを。"
+            },
+            "ENTP": {
+                type: "討論者タイプ",
+                subtitle: "好奇心旺盛、トレンド好き",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/entp-debater.png",
+                eyebrow: "モダン・フェザー眉：個性的で洗練された印象。あなたのクリエイティブな発想と知的な魅力を引き立てます。",
+                iv: "αリポ酸点滴：脳の活性化と美容効果を両立。あなたの創造性をサポートしながら、若々しい肌をキープ。"
+            },
+            "ESFJ": {
+                type: "領事タイプ",
+                subtitle: "思いやり・調和重視",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/esfj-consul.png",
+                eyebrow: "ソフト・アーチ眉：優しく包容力のある印象を演出。あなたの温かな人柄が表情に現れる、愛され眉スタイル。",
+                iv: "コラーゲン点滴：肌のハリと弾力をサポートし、あなたの優しい笑顔をより美しく。内側からふっくらとした若々しさを。"
+            },
+            "ESFP": {
+                type: "エンターテイナータイプ",
+                subtitle: "華やか・明るいムードメーカー",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/esfp-entertainer.png",
+                eyebrow: "カジュアル・ストレート眉：気取らない自然な美しさを表現。あなたの素直で飾らない魅力を最大限に引き出します。",
+                iv: "マルチビタミン点滴：元気いっぱいのあなたに必要な栄養を総合的に補給。疲れ知らずの美肌をサポート。"
+            },
+            "ESTJ": {
+                type: "幹部タイプ",
+                subtitle: "責任感・きちんと感",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/estj-executive.png",
+                eyebrow: "クラシック・アーチ眉：時代を超えて愛される上品なスタイル。あなたの信頼性と品格を表現する、格調高い眉デザイン。",
+                iv: "疲労回復点滴：忙しい毎日を支える栄養補給で、いつも最高のパフォーマンスを。美容効果も期待できる総合サポート。"
+            },
+            "ESTP": {
+                type: "起業家タイプ",
+                subtitle: "行動力・アクティブ",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/estp-entrepreneur.png",
+                eyebrow: "アクティブ・ストレート眉：エネルギッシュで行動力のある印象を演出。あなたのバイタリティを表現する力強い眉。",
+                iv: "エナジー点滴：アクティブなライフスタイルをサポート。疲労回復と美肌効果で、常にベストコンディションをキープ。"
+            },
+            "INFJ": {
+                type: "提唱者タイプ",
+                subtitle: "誠実、信頼感を大事にする",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/infj-advocate.png",
+                eyebrow: "ミステリアス・アーチ眉：知的で上品な印象を演出。あなたの内面の美しさと深い思考を表現する洗練されたスタイル。",
+                iv: "美白点滴：透明感のある肌で、あなたの神秘的な魅力をさらに引き立てます。内側から輝く純粋な美しさを。"
+            },
+            "INFP": {
+                type: "仲介者タイプ",
+                subtitle: "優しく繊細",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/infp-mediator.png",
+                eyebrow: "ナチュラル・ソフト眉：優しく控えめな美しさを表現。あなたの繊細な感性と内面の美しさを静かに主張します。",
+                iv: "リラックス点滴：敏感なあなたの心と体を優しくケア。ストレス軽減と美肌効果で、心身ともに美しく。"
+            },
+            "INTJ": {
+                type: "建築家タイプ",
+                subtitle: "計画的・知的",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/intj-architect.png",
+                eyebrow: "インテリジェント・アーチ眉：知性と意志の強さを表現する洗練されたデザイン。あなたの戦略的思考を美しく演出。",
+                iv: "ブレイン点滴：集中力向上と美容効果を両立。あなたの知的活動をサポートしながら、若々しい美しさを保持。"
+            },
+            "INTP": {
+                type: "論理学者タイプ",
+                subtitle: "探究心旺盛・冷静",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/intp-thinker.png",
+                eyebrow: "ユニーク・ストレート眉：個性的で知的な印象を演出。あなたの独創性と論理的思考を表現する特別なデザイン。",
+                iv: "アンチエイジング点滴：時間を忘れて集中するあなたに、若々しさをキープする総合的なケアを提供。"
+            },
+            "ISFJ": {
+                type: "擁護者タイプ",
+                subtitle: "献身的・安心感を与える",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/isfj-defender.png",
+                eyebrow: "クラシック・ソフト眉：上品で控えめな美しさを表現。あなたの包容力と優しさを眉で表現する、愛され続けるスタイル。",
+                iv: "保湿点滴：乾燥から肌を守り、あなたの優しい印象をより美しく。内側からのうるおいで、常にベストな肌状態を。"
+            },
+            "ISFP": {
+                type: "冒険家タイプ",
+                subtitle: "自然体・マイペース",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/isfp-adventurer.png",
+                eyebrow: "アーティスティック眉：あなたの芸術的センスを表現する個性的なデザイン。自然な美しさの中に、ユニークな魅力をプラス。",
+                iv: "デトックス点滴：自然体のあなたに、体内から美しさを引き出すクレンジング効果。純粋で透明感のある美肌へ。"
+            },
+            "ISTJ": {
+                type: "管理者タイプ",
+                subtitle: "誠実・堅実",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/istj-logistician.png",
+                eyebrow: "トラディショナル・アーチ眉：時代を超えて愛される定番スタイル。あなたの信頼性と堅実さを表現する、品格ある眉。",
+                iv: "ベーシック点滴：基本に忠実な栄養補給で、健康的な美しさをサポート。シンプルで確実な美容効果を実感。"
+            },
+            "ISTP": {
+                type: "巨匠タイプ",
+                subtitle: "クール・実用主義",
+                avatarUrl: "https://www.16personalities.com/static/images/personality-types/avatars/istp-virtuoso.png",
+                eyebrow: "シンプル・ストレート眉：無駄を削ぎ落とした洗練されたデザイン。あなたの職人的なこだわりと美意識を表現。",
+                iv: "集中力点滴：細かな作業に集中するあなたに、疲労回復と美肌効果を同時に提供。クリアな思考と美しさを両立。"
+            }
+        };
+
+        let currentQuestion = 0;
+        let answers = [];
+
+        // 初期化
+        function initQuiz() {
+            showQuestion(0);
+        }
+
+        // 質問表示
+        function showQuestion(questionIndex) {
+            const question = questions[questionIndex];
+            document.getElementById('questionCounter').textContent = `質問 ${questionIndex + 1} / 4`;
+            document.getElementById('questionText').textContent = question.text;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option.text;
+                optionDiv.onclick = () => selectOption(index, option.value);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            // プログレスバー更新
+            const progress = ((questionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // 次へボタンを隠す
+            document.getElementById('nextBtn').classList.remove('show');
+        }
+
+        // 選択肢選択
+        function selectOption(optionIndex, value) {
+            // 全ての選択肢からselectedクラスを削除
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // 選択された選択肢にselectedクラスを追加
+            document.querySelectorAll('.option')[optionIndex].classList.add('selected');
+
+            // 回答を保存
+            answers[currentQuestion] = value;
+
+            // 次へボタンを表示
+            document.getElementById('nextBtn').classList.add('show');
+        }
+
+        // 次の質問へ
+        function nextQuestion() {
+            if (answers[currentQuestion]) {
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    setTimeout(() => {
+                        showQuestion(currentQuestion);
+                    }, 300);
+                } else {
+                    setTimeout(() => {
+                        showResult();
+                    }, 300);
+                }
+            }
+        }
+
+        // 結果表示
+        function showResult() {
+            // MBTI判定
+            const mbtiType = answers.join('');
+            const result = mbtiResults[mbtiType];
+
+            // 画面切り替え
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'block';
+
+            // 結果表示
+            const avatarImg = document.getElementById('resultAvatar');
+            avatarImg.src = result.avatarUrl;
+            avatarImg.alt = result.type;
+            document.getElementById('resultType').textContent = result.type;
+            document.getElementById('resultSubtitle').textContent = result.subtitle;
+            document.getElementById('eyebrowRecommendation').textContent = result.eyebrow;
+            document.getElementById('ivRecommendation').textContent = result.iv;
+        }
+
+        // 診断再開
+        function restartQuiz() {
+            currentQuestion = 0;
+            answers = [];
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+            showQuestion(0);
+        }
+
+        // ページ読み込み時に初期化
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
